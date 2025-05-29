@@ -73,7 +73,7 @@ Make sure you have the following installed:
 1. Navigate to the client directory:
 
    ```bash
-   cd client
+   cd Client
    ```
 
 2. Install dependencies:
