@@ -118,24 +118,43 @@ export default function TokenSaleDApp() {
         };
     }, [location.pathname]);
 
-    const handleTransfer = () => {
+    const handleTransfer = async () => {
         if (!walletConnected) {
-            alert('Please connect your wallet first');
-            return;
+          alert('Please connect your wallet first');
+          return;
         }
-
-        const amount = parseInt(transferAmount);
-        if (amount > userTokenBalance) {
-            alert('Insufficient token balance');
-            return;
+      
+        try {
+          setLoading(true);
+      
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+      
+          const contract = new ethers.Contract(
+            TokenJson.address,
+            TokenJson.abi,
+            signer
+          );
+      
+          // ✅ Convert human-readable token amount to wei-like units (10^18)
+          const amountInUnits = ethers.parseUnits(transferAmount, 18);
+      
+          // ✅ Transfer tokens
+          const transaction = await contract.transfer(transferRecipient, amountInUnits);
+          await transaction.wait();
+      
+          alert(`Transferred ${transferAmount} OK to ${transferRecipient}`);
+          setUserTokenBalance((prev) => prev - parseFloat(transferAmount)); // for UI only
+          setTransferAmount('');
+          setTransferRecipient('');
+        } catch (err) {
+          console.error('Transaction failed:', err);
+          alert('Transaction failed. See console for details.');
+        } finally {
+          setLoading(false);
         }
-
-        // Mock transfer transaction
-        alert(`Transferring ${transferAmount} ${saleData.tokenSymbol} to ${transferRecipient}`);
-        setUserTokenBalance(prev => prev - amount);
-        setTransferRecipient('');
-        setTransferAmount('');
-    };
+      };
+      
 
     const handleApprove = () => {
         if (!walletConnected) {
@@ -475,10 +494,18 @@ export default function TokenSaleDApp() {
 
                                         <button
                                             onClick={handleTransfer}
+                                            style={{cursor:"pointer"}}
                                             disabled={!walletConnected || !transferRecipient || !transferAmount}
                                             className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
-                                            TRANSFER
+                                           {loading ? (
+                                                <>
+                                                    <Loader2 className="animate-spin h-5 w-5" />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                walletConnected ? 'Transfer' : 'CONNECT WALLET TO PURCHASE'
+                                            )}
                                         </button>
                                     </div>
                                 </div>
