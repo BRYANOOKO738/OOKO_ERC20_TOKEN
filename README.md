@@ -37,7 +37,7 @@ Make sure you have the following installed:
 1. Clone the repo:
 
    ```bash
-   [git clone https://github.com/BRYANOOKO738/OOKO_ERC20_TOKEN.git
+   git clone https://github.com/BRYANOOKO738/OOKO_ERC20_TOKEN.git
    cd mytoken
    ```
 
@@ -60,10 +60,10 @@ Make sure you have the following installed:
    forge test
    ```
 
-5. Deploy the contract to your preferred network (e.g., local Anvil, testnet):
+5. Deploy the contract to your preferred network (e.g., local Anvil, sepolia testnet) add the RPC_URL and PRIVATE_KEY to your .env file  :
 
    ```bash
-   forge create --rpc-url <RPC_URL> --private-key <PRIVATE_KEY> src/MyToken.sol:MyToken
+   forge script script/MyCoin.s.sol:MyTokenScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
    ```
 
 ---
