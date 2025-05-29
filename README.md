@@ -67,6 +67,13 @@ Make sure you have the following installed:
    ```
 
 ---
+5. Deploy at this address :
+
+   ```bash
+   0xCaD0C8e13618101F34c63637e1c36185656483F4
+   ```
+
+---
 
 ### Running the React Client
 
