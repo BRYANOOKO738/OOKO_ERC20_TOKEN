@@ -136,8 +136,9 @@ export default function TokenSaleDApp() {
             signer
           );
       
-          // ✅ Convert human-readable token amount to wei-like units (10^18)
-          const amountInUnits = ethers.parseUnits(transferAmount, 18);
+         
+          const amountInUnits = ethers.parseUnits(transferAmount, 18); // ✅ correct
+
       
           // ✅ Transfer tokens
           const transaction = await contract.transfer(transferRecipient, amountInUnits);
@@ -186,7 +187,7 @@ export default function TokenSaleDApp() {
     useEffect(() => {
         const handleGetBalanceOF = async () => {
 
-            console.log("working");
+            
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
 
