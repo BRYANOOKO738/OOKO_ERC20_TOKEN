@@ -157,27 +157,77 @@ export default function TokenSaleDApp() {
       };
       
 
-    const handleApprove = () => {
+    const handleApprove = async() => {
         if (!walletConnected) {
             alert('Please connect your wallet first');
             return;
         }
+        try {
+            setLoading(true);
+        
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+        
+            const contract = new ethers.Contract(
+              TokenJson.address,
+              TokenJson.abi,
+              signer
+            );
+        
+           
+            const amountInUnits = ethers.parseUnits(approveAmount, 18); // ✅ correct
+  
+        
+            // ✅ Transfer tokens
+            const approving = await contract.approve(approveSpender, amountInUnits);
+            await approving.wait();
+        
+            alert(`Approving ${approveAmount} ${saleData.tokenSymbol} for ${approveSpender}`);
+            setApproveSpender('');
+            setApproveAmount('');
+          } catch (err) {
+            console.error('Transaction failed:', err);
+            alert('Transaction failed. See console for details.');
+          } finally {
+            setLoading(false);
+          }
 
         // Mock approve transaction
-        alert(`Approving ${approveAmount} ${saleData.tokenSymbol} for ${approveSpender}`);
-        setApproveSpender('');
-        setApproveAmount('');
+       
     };
 
-    const handleCheckAllowance = () => {
+    const handleCheckAllowance = async() => {
         if (!allowanceOwner || !allowanceSpender) {
             alert('Please enter both owner and spender addresses');
             return;
         }
 
-        // Mock allowance check - in real implementation, this would query the contract
-        const mockAllowance = Math.floor(Math.random() * 1000);
-        setAllowanceAmount(mockAllowance.toString());
+        try {
+            setLoading(true);
+        
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+        
+            const contract = new ethers.Contract(
+              TokenJson.address,
+              TokenJson.abi,
+              signer
+            );
+        
+        
+            // ✅ Transfer tokens
+            const allawence = await contract.allowance(allowanceOwner, allowanceSpender);
+            
+            const formattedAllowance = ethers.formatUnits(allawence, 18);
+            setAllowanceAmount(formattedAllowance);
+        
+          } catch (err) {
+            console.error('Transaction failed:', err);
+            alert('Transaction failed. See console for details.');
+          } finally {
+            setLoading(false);
+          }
+
     };
 
     const handlePurchaseAmountChange = (value) => {
@@ -549,7 +599,14 @@ export default function TokenSaleDApp() {
                                             disabled={!walletConnected || !approveSpender || !approveAmount}
                                             className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
-                                            APPROVE
+                                            {loading ? (
+                                                <>
+                                                    <Loader2 className="animate-spin h-5 w-5" />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                walletConnected ? 'APROVE TOKENS' : 'CONNECT WALLET TO PURCHASE'
+                                            )}
                                         </button>
                                     </div>
                                 </div>
@@ -594,9 +651,17 @@ export default function TokenSaleDApp() {
                                         <button
                                             onClick={handleCheckAllowance}
                                             disabled={!allowanceOwner || !allowanceSpender}
+                                            // style={{courso}}
                                             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
-                                            CHECK ALLOWANCE
+                                           {loading ? (
+                                                <>
+                                                    <Loader2 className="animate-spin h-5 w-5" />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                walletConnected ? 'CHECK ALLOWANCE' : 'CONNECT WALLET TO PURCHASE'
+                                            )}
                                         </button>
                                     </div>
                                 </div>
