@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'Client/**'        # trigger only if files inside client/ change
+
 
 jobs:
   build-and-deploy:
@@ -20,18 +23,21 @@ jobs:
 
       - name: 📦 Install dependencies
         run: npm install
+        working-directory: ./Client
 
       - name: 🧪 Run tests
         run: npm test
+        working-directory: ./Client
 
       - name: 🛠️ Build project
         run: npm run build
+        working-directory: ./Client
 
       - name: 🚀 Deploy to Netlify
         uses: nwtgck/actions-netlify@v2
         with:
-          publish-dir: ./dist
-          production-branch: main
+          publish-dir: ./Client/dist   # update if your build output folder is different
+          production-branch: master
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Automated deployment from GitHub Actions"
           enable-pull-request-comment: false
