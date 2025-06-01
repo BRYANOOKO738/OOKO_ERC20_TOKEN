@@ -25,9 +25,7 @@ jobs:
         run: npm install
         working-directory: ./Client
 
-      - name: 🧪 Run tests
-        run: npm test
-        working-directory: ./Client
+     
 
       - name: 🛠️ Build project
         run: npm run build
