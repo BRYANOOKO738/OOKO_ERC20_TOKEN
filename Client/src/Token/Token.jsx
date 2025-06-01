@@ -19,6 +19,7 @@ export default function TokenSaleDApp() {
     // Transfer state
     const [transferRecipient, setTransferRecipient] = useState('');
     const [transferAmount, setTransferAmount] = useState('');
+    const [transferFromAmount, setTransferFromAmount] = useState('');
 
     // Approve state
     const [approveSpender, setApproveSpender] = useState('');
@@ -120,83 +121,83 @@ export default function TokenSaleDApp() {
 
     const handleTransfer = async () => {
         if (!walletConnected) {
-          alert('Please connect your wallet first');
-          return;
+            alert('Please connect your wallet first');
+            return;
         }
-      
+
         try {
-          setLoading(true);
-      
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
-      
-          const contract = new ethers.Contract(
-            TokenJson.address,
-            TokenJson.abi,
-            signer
-          );
-      
-         
-          const amountInUnits = ethers.parseUnits(transferAmount, 18); // ✅ correct
+            setLoading(true);
 
-      
-          // ✅ Transfer tokens
-          const transaction = await contract.transfer(transferRecipient, amountInUnits);
-          await transaction.wait();
-      
-          alert(`Transferred ${transferAmount} OK to ${transferRecipient}`);
-          setUserTokenBalance((prev) => prev - parseFloat(transferAmount)); // for UI only
-          setTransferAmount('');
-          setTransferRecipient('');
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+
+            const contract = new ethers.Contract(
+                TokenJson.address,
+                TokenJson.abi,
+                signer
+            );
+
+
+            const amountInUnits = ethers.parseUnits(transferAmount, 18); // ✅ correct
+
+
+            // ✅ Transfer tokens
+            const transaction = await contract.transfer(transferRecipient, amountInUnits);
+            await transaction.wait();
+
+            alert(`Transferred ${transferAmount} OK to ${transferRecipient}`);
+            setUserTokenBalance((prev) => prev - parseFloat(transferAmount)); // for UI only
+            setTransferAmount('');
+            setTransferRecipient('');
         } catch (err) {
-          console.error('Transaction failed:', err);
-          alert('Transaction failed. See console for details.');
+            console.error('Transaction failed:', err);
+            alert('Transaction failed. See console for details.');
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
-      
+    };
 
-    const handleApprove = async() => {
+
+    const handleApprove = async () => {
         if (!walletConnected) {
             alert('Please connect your wallet first');
             return;
         }
         try {
             setLoading(true);
-        
+
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-        
+
             const contract = new ethers.Contract(
-              TokenJson.address,
-              TokenJson.abi,
-              signer
+                TokenJson.address,
+                TokenJson.abi,
+                signer
             );
-        
-           
+
+
             const amountInUnits = ethers.parseUnits(approveAmount, 18); // ✅ correct
-  
-        
+
+
             // ✅ Transfer tokens
             const approving = await contract.approve(approveSpender, amountInUnits);
             await approving.wait();
-        
+
             alert(`Approving ${approveAmount} ${saleData.tokenSymbol} for ${approveSpender}`);
             setApproveSpender('');
             setApproveAmount('');
-          } catch (err) {
+        } catch (err) {
             console.error('Transaction failed:', err);
             alert('Transaction failed. See console for details.');
-          } finally {
+        } finally {
             setLoading(false);
-          }
+        }
 
         // Mock approve transaction
-       
+
     };
 
-    const handleCheckAllowance = async() => {
+    const handleCheckAllowance = async () => {
         if (!allowanceOwner || !allowanceSpender) {
             alert('Please enter both owner and spender addresses');
             return;
@@ -204,32 +205,70 @@ export default function TokenSaleDApp() {
 
         try {
             setLoading(true);
-        
+
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-        
+
             const contract = new ethers.Contract(
-              TokenJson.address,
-              TokenJson.abi,
-              signer
+                TokenJson.address,
+                TokenJson.abi,
+                signer
             );
-        
-        
+
+
             // ✅ Transfer tokens
             const allawence = await contract.allowance(allowanceOwner, allowanceSpender);
-            
+
             const formattedAllowance = ethers.formatUnits(allawence, 18);
             setAllowanceAmount(formattedAllowance);
-        
-          } catch (err) {
+
+        } catch (err) {
             console.error('Transaction failed:', err);
             alert('Transaction failed. See console for details.');
-          } finally {
+        } finally {
             setLoading(false);
-          }
+        }
 
     };
+    const handleTransferFromOwner = async () => {
+        if (!walletConnected) {
+            alert('Please connect your wallet first');
+            return;
+        }
 
+        try {
+            setLoading(true);
+
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+
+            const contract = new ethers.Contract(
+                TokenJson.address,
+                TokenJson.abi,
+                signer
+            );
+
+
+            const amountInUnits = ethers.parseUnits(transferFromAmount, 18); // ✅ correct
+
+
+            // ✅ Transfer tokens
+            const transaction = await contract.transferFrom(allowanceOwner, allowanceSpender, amountInUnits);
+            await transaction.wait();
+
+            alert(`Transferred ${transferFromAmount} OK to ${allowanceSpender}`);
+            setUserTokenBalance((prev) => prev - parseFloat(transferAmount)); // for UI only
+            setTransferFromAmount('');
+            setAllowanceOwner("");
+            setAllowanceSpender("");
+
+        } catch (err) {
+            console.error('Transaction failed:', err);
+            alert('Transaction failed. See console for details.');
+        } finally {
+            setLoading(false);
+        }
+    }
     const handlePurchaseAmountChange = (value) => {
         setPurchaseAmount(value);
         setEthAmount((value * saleData.tokenPrice).toFixed(6));
@@ -237,7 +276,7 @@ export default function TokenSaleDApp() {
     useEffect(() => {
         const handleGetBalanceOF = async () => {
 
-            
+
             try {
                 const provider = new ethers.BrowserProvider(window.ethereum);
 
@@ -409,7 +448,8 @@ export default function TokenSaleDApp() {
                                 { id: 'purchase', label: 'Buy Tokens' },
                                 { id: 'transfer', label: 'Transfer' },
                                 { id: 'approve', label: 'Approve' },
-                                { id: 'allowance', label: 'Allowance' }
+                                { id: 'allowance', label: 'Allowance' },
+                                { id: 'transferfrom', label: 'Transfer From' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -492,7 +532,7 @@ export default function TokenSaleDApp() {
                                             onClick={purchaseTokens}
                                             style={{ cursor: "pointer" }}
                                             disabled={!walletConnected || !purchaseAmount}
-                                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
                                             {loading ? (
                                                 <>
@@ -545,11 +585,11 @@ export default function TokenSaleDApp() {
 
                                         <button
                                             onClick={handleTransfer}
-                                            style={{cursor:"pointer"}}
+                                            style={{ cursor: "pointer" }}
                                             disabled={!walletConnected || !transferRecipient || !transferAmount}
-                                            className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
-                                           {loading ? (
+                                            {loading ? (
                                                 <>
                                                     <Loader2 className="animate-spin h-5 w-5" />
                                                     Processing...
@@ -597,7 +637,7 @@ export default function TokenSaleDApp() {
                                         <button
                                             onClick={handleApprove}
                                             disabled={!walletConnected || !approveSpender || !approveAmount}
-                                            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
                                             {loading ? (
                                                 <>
@@ -652,9 +692,9 @@ export default function TokenSaleDApp() {
                                             onClick={handleCheckAllowance}
                                             disabled={!allowanceOwner || !allowanceSpender}
                                             // style={{courso}}
-                                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                                         >
-                                           {loading ? (
+                                            {loading ? (
                                                 <>
                                                     <Loader2 className="animate-spin h-5 w-5" />
                                                     Processing...
@@ -663,6 +703,64 @@ export default function TokenSaleDApp() {
                                                 walletConnected ? 'CHECK ALLOWANCE' : 'CONNECT WALLET TO PURCHASE'
                                             )}
                                         </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'transferfrom' && (
+                                <div>
+                                    <h2 className="text-2xl font-bold mb-6">Transfer From Owner Address</h2>
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Owner Address</label>
+                                            <input
+                                                type="text"
+                                                value={allowanceOwner}
+                                                onChange={(e) => setAllowanceOwner(e.target.value)}
+                                                placeholder="Enter owner address"
+                                                className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Spender/Your Address</label>
+                                            <input
+                                                type="text"
+                                                value={allowanceSpender}
+                                                onChange={(e) => setAllowanceSpender(e.target.value)}
+                                                placeholder="Enter spender address"
+                                                className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Amount</label>
+                                            <input
+                                                type="text"
+                                                value={transferFromAmount}
+                                                onChange={(e) => setTransferFromAmount(e.target.value)}
+                                                placeholder="Enter spender address"
+                                                className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                            />
+                                        </div>
+
+
+
+                                        <button
+                                            onClick={handleTransferFromOwner}
+                                            disabled={!allowanceOwner || !allowanceSpender || !transferFromAmount}
+                                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <Loader2 className="animate-spin h-5 w-5" />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                walletConnected ? 'Transfer From Owner' : 'CONNECT WALLET TO PURCHASE'
+                                            )}
+                                        </button>
+
                                     </div>
                                 </div>
                             )}
