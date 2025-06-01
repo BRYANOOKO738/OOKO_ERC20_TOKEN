@@ -323,7 +323,7 @@ export default function TokenSaleDApp() {
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <div className="flex items-center space-x-3 mb-4 md:mb-0">
                         <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl">
-                            K
+                            OK
                         </div>
                         <h1 className="text-2xl md:text-3xl font-bold">OOKOToken Sale</h1>
                     </div>
