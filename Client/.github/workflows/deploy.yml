@@ -3,7 +3,7 @@ name: CI/CD - Test and Deploy to Netlify
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-deploy:
